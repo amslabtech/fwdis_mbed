@@ -13,6 +13,7 @@ Steering::Steering(void)
     current_w.push_back(0);
     pulse.push_back(0);
     offsets.push_back(0);
+    angles(0);
   }
   Potentiometer _pm_fr(PM_FR);
   Potentiometer _pm_fl(PM_FL);
@@ -22,6 +23,9 @@ Steering::Steering(void)
   potentiometers.push_back(_pm_fl);
   potentiometers.push_back(_pm_rr);
   potentiometers.push_back(_pm_rl);
+  for(int i=0;i<4;i++){
+    angles[i] = get_angle(i);
+  }
 }
 
 void Steering::test(void)
@@ -55,12 +59,13 @@ void Steering::thread_worker()
     pulse[1] = encoder_fl.get_pulse();
     pulse[2] = encoder_rr.get_pulse();
     pulse[3] = encoder_rl.get_pulse();
-    /*
+    for(int i=0;i<4;i++){
+      angles[i] += 2.0 * M_PI * (pulse[i] / ENCODER_PULSE4 * GEAR_RATIO);
+    }
     encoder_fr.reset();
     encoder_fl.reset();
     encoder_rr.reset();
     encoder_rl.reset();
-    */
     Thread::wait(INTERVAL*1000);
   }
 }

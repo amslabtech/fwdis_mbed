@@ -29,6 +29,7 @@ private:
   STM32RotaryEncoder8 encoder_rr;// rB
   std::vector<Potentiometer> potentiometers;// fr, fl, rr, rl
   std::vector<double> offsets;// fr, fl, rr, rl
+  std::vector<double> angles;// fr, fl, rr, rl
   Thread *_thread;
 
   const int ENCODER_PULSE4;
@@ -38,7 +39,7 @@ private:
   static const int ID_R = 129;
   static const int BAUDRATE = 9600;
   constexpr static const double INTERVAL = 0.010;// [s]
-  constexpr static const double GEAR_RATIO = 23.1;
+  constexpr static const double GEAR_RATIO = 56.1;
   static const int ENCODER_PULSE = 500;
   constexpr static const double VOLTAGE = 24;// [V]
   constexpr static const double RAD_P_V = 34.35;//[rad/s/V]
