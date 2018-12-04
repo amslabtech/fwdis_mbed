@@ -92,10 +92,10 @@ void Steering::thread_worker()
 
 void Steering::set_angular_velocity(double w_fr, double w_fl, double w_rr, double w_rl)
 {
-  target_w[0] = w_fr;
-  target_w[1] = w_fl;
-  target_w[2] = w_rr;
-  target_w[3] = w_rl;
+  target_w[0] = w_fr * GEAR_RATIO;
+  target_w[1] = w_fl * GEAR_RATIO;
+  target_w[2] = w_rr * GEAR_RATIO;
+  target_w[3] = w_rl * GEAR_RATIO;
 }
 
 // for debug
