@@ -35,6 +35,7 @@ private:
   std::vector<double> current_w;// fr, fl, rr, rl
   std::vector<int> pulse;// fr, fl, rr, rl
   std::vector<PID> pid;// fr, fl, rr, rl
+  std::vector<int> sum_pulses;
 
   const int ENCODER_PULSE4;
 
@@ -43,8 +44,7 @@ private:
   static const int ID_R = 129;
   static const int BAUDRATE = 9600;
   constexpr static const double INTERVAL = 0.010;// [s]
-  //constexpr static const double GEAR_RATIO = 23.1;
-  constexpr static const double GEAR_RATIO = 762;
+  constexpr static const double GEAR_RATIO = 23.1;// 21*1.1
   static const int ENCODER_PULSE = 500;
   constexpr static const double VOLTAGE = 24;// [V]
   constexpr static const double RAD_P_V = 34.35;//[rad/s/V]

@@ -12,6 +12,7 @@ Driving::Driving(void)
     target_w.push_back(0);
     current_w.push_back(0);
     pulse.push_back(0);
+    sum_pulses.push_back(0);
   }
   PID _pid_fr;
   PID _pid_fl;
@@ -67,9 +68,11 @@ void Driving::thread_worker()
     pulse[2] = -encoder_rr.get_pulse();
     pulse[3] = -encoder_rl.get_pulse();
     for(int i=0;i<4;i++){
-      current_w[i] = (double)pulse[i] / ENCODER_PULSE4;
+      // TODO: fix next line
+      current_w[i] = 2 * M_PI * (double)pulse[i] / ENCODER_PULSE4 / INTERVAL;// motor omega
       double output = pid[i].calculate(current_w[i]);
       //set_speed(i, omega_to_command(output));
+      sum_pulses[i] += pulse[i];
     }
     encoder_fr.reset();
     encoder_fl.reset();
@@ -94,8 +97,8 @@ void Driving::set_angular_velocity(double w_fr, double w_fl, double w_rr, double
 std::string Driving::get_pulses(void)
 {
   std::string str = "";
-  for(int i=0;i<pulse.size();i++){
-    str += std::to_string(pulse[i]) + ", ";
+  for(int i=0;i<4;i++){
+    str += std::to_string(sum_pulses[i]) + ", ";
   }
   return str;
 }
