@@ -13,6 +13,7 @@ Driving::Driving(void)
     current_w.push_back(0);
     pulse.push_back(0);
     sum_pulses.push_back(0);
+    negative_flag.push_back(false);
   }
   PID _pid_fr;
   PID _pid_fl;
@@ -23,10 +24,10 @@ Driving::Driving(void)
   pid.push_back(_pid_rr);
   pid.push_back(_pid_rl);
   for(int i=0;i<4;i++){
-    pid[i].set_gain(1, 0, 0);
+    pid[i].set_gain(1.0, 1.0, 0);
     pid[i].set_dt(INTERVAL);
-    pid[i].set_input_limit(-MAX_W, MAX_W);
-    pid[i].set_output_limit(-MAX_W, MAX_W);
+    pid[i].set_input_limit(0, MAX_W);
+    pid[i].set_output_limit(0, MAX_W);
     pid[i].set_integral_max(0.5);
   }
 }
@@ -39,9 +40,11 @@ void Driving::test(void)
   st_r.SetSpeedMotorA((int)(target_w[2] / MAX_W * 127));
   st_r.SetSpeedMotorB((int)(target_w[3] / MAX_W * 127));
   */
+  /*
   for(int i=0;i<4;i++){
     set_speed(i, omega_to_command(target_w[i]));
   }
+  */
 }
 
 void Driving::start_control(void)
@@ -62,17 +65,25 @@ void Driving::thread_starter(void const *p)
 void Driving::thread_worker()
 {
   while(1){
-    test();
+    //test();
     pulse[0] = encoder_fr.get_pulse();
-    pulse[1] = -encoder_fl.get_pulse();
+    pulse[1] = encoder_fl.get_pulse();
     pulse[2] = -encoder_rr.get_pulse();
-    pulse[3] = -encoder_rl.get_pulse();
+    pulse[3] = encoder_rl.get_pulse();
     for(int i=0;i<4;i++){
       // TODO: fix next line
-      current_w[i] = 2 * M_PI * (double)pulse[i] / ENCODER_PULSE4 / INTERVAL;// motor omega
+      current_w[i] = 2.0 * M_PI * (double)pulse[i] / ENCODER_PULSE4 / INTERVAL;// motor omega
+      if(negative_flag[i]){
+        current_w[i] = -current_w[i];
+      }
       double output = pid[i].calculate(current_w[i]);
-      //set_speed(i, omega_to_command(output));
-      sum_pulses[i] += pulse[i];
+      if(negative_flag[i]){
+        output = -output;
+      }
+      set_speed(i, omega_to_command(output));
+      //sum_pulses[i] += pulse[i];
+      //sum_pulses[i] = output * 1000.0;
+      sum_pulses[i] = current_w[i] / GEAR_RATIO * 1000.0;
     }
     encoder_fr.reset();
     encoder_fl.reset();
@@ -90,6 +101,11 @@ void Driving::set_angular_velocity(double w_fr, double w_fl, double w_rr, double
   target_w[3] = w_rl * GEAR_RATIO;
   for(int i=0;i<4;i++){
     pid[i].set_set_point(target_w[i]);
+    if(target_w[i] < 0){
+      negative_flag[i] = true;
+    }else{
+      negative_flag[i] = false;
+    }
   }
 }
 
