@@ -34,12 +34,12 @@ void start_callback(const std_msgs::Empty& msg)
 void fwdis_callback(const fwdis_msgs::FourWheelDriveIndependentSteering& msg)
 {
   fwdis = msg;
-  steering.set_angular_velocity(fwdis.front_right_wheel_velocity, fwdis.front_left_wheel_velocity, fwdis.rear_right_wheel_velocity, fwdis.rear_left_wheel_velocity);
+  steering.set_steering_angle(fwdis.front_right_steering_angle, fwdis.front_left_steering_angle, fwdis.rear_right_steering_angle, fwdis.rear_left_steering_angle);
 }
 
 ros::Subscriber<std_msgs::Empty> reset_sub("/mbed/reset", reset_callback);
 ros::Subscriber<std_msgs::Empty> start_sub("/mbed/start", start_callback);
-ros::Subscriber<fwdis_msgs::FourWheelDriveIndependentSteering> fwdis_sub("/fwdis/velocity", fwdis_callback);
+ros::Subscriber<fwdis_msgs::FourWheelDriveIndependentSteering> fwdis_sub("/fwdis/command", fwdis_callback);
 
 void work(void const *args)
 {
