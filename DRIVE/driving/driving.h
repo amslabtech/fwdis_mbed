@@ -20,7 +20,7 @@ public:
   std::string get_pulses(void);
 
 private:
-  int valtage_to_command(double);
+  int voltage_to_command(double);
   int omega_to_command(double);
   void set_speed(int, int);// 0~3:fr, fl, rr, rl
 

@@ -24,11 +24,12 @@ Driving::Driving(void)
   pid.push_back(_pid_rr);
   pid.push_back(_pid_rl);
   for(int i=0;i<4;i++){
-    pid[i].set_gain(1.0, 1.0, 0);
+    pid[i].set_gain(0.040, 0.0, -0.00001);
     pid[i].set_dt(INTERVAL);
     pid[i].set_input_limit(0, MAX_W);
-    pid[i].set_output_limit(0, MAX_W);
+    pid[i].set_output_limit(0, VOLTAGE);
     pid[i].set_integral_max(0.01);
+    pid[i].set_set_point(0);
   }
 }
 
@@ -83,11 +84,18 @@ void Driving::thread_worker()
       if(negative_flag[i]){
         output = -output;
       }
-      set_speed(i, omega_to_command(output));
+      if(negative_flag[i]){
+        set_speed(i, omega_to_command(-target_w[i]));
+      }else{
+        set_speed(i, omega_to_command(target_w[i]));
+      }
+      //set_speed(i, voltage_to_command(output));
       //set_speed(i, omega_to_command(231));
       //sum_pulses[i] += pulse[i];
       //sum_pulses[i] = output * 1000.0;
+      //sum_pulses[i] = target_w[i] * 1000.0;
       sum_pulses[i] = current_w[i] / GEAR_RATIO * 1000.0;
+      //sum_pulses[i] = (target_w[i] - current_w[i]) * 1000.0;
     }
     Thread::wait(INTERVAL*1000);
   }
@@ -100,12 +108,13 @@ void Driving::set_angular_velocity(double w_fr, double w_fl, double w_rr, double
   target_w[2] = w_rr * GEAR_RATIO;
   target_w[3] = w_rl * GEAR_RATIO;
   for(int i=0;i<4;i++){
-    pid[i].set_set_point(target_w[i]);
     if(target_w[i] < 0){
+      target_w[i] = -target_w[i];
       negative_flag[i] = true;
     }else{
       negative_flag[i] = false;
     }
+    pid[i].set_set_point(target_w[i]);
   }
 }
 
@@ -119,14 +128,14 @@ std::string Driving::get_pulses(void)
   return str;
 }
 
-int Driving::valtage_to_command(double v)
+int Driving::voltage_to_command(double v)
 {
   return (int)(v / VOLTAGE * 127);
 }
 
 int Driving::omega_to_command(double w)
 {
-  return (int)(w / MAX_W * 127);
+  return (int)(w / MAX_W * 127) / 2.5;
 }
 
 void Driving::set_speed(int id, int speed)
