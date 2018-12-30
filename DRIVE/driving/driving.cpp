@@ -28,7 +28,7 @@ Driving::Driving(void)
     pid[i].set_dt(INTERVAL);
     pid[i].set_input_limit(0, MAX_W);
     pid[i].set_output_limit(0, MAX_W);
-    pid[i].set_integral_max(0.5);
+    pid[i].set_integral_max(0.01);
   }
 }
 
@@ -70,8 +70,11 @@ void Driving::thread_worker()
     pulse[1] = encoder_fl.get_pulse();
     pulse[2] = -encoder_rr.get_pulse();
     pulse[3] = encoder_rl.get_pulse();
+    encoder_fr.reset();
+    encoder_fl.reset();
+    encoder_rr.reset();
+    encoder_rl.reset();
     for(int i=0;i<4;i++){
-      // TODO: fix next line
       current_w[i] = 2.0 * M_PI * (double)pulse[i] / ENCODER_PULSE4 / INTERVAL;// motor omega
       if(negative_flag[i]){
         current_w[i] = -current_w[i];
@@ -81,14 +84,11 @@ void Driving::thread_worker()
         output = -output;
       }
       set_speed(i, omega_to_command(output));
+      //set_speed(i, omega_to_command(231));
       //sum_pulses[i] += pulse[i];
       //sum_pulses[i] = output * 1000.0;
       sum_pulses[i] = current_w[i] / GEAR_RATIO * 1000.0;
     }
-    encoder_fr.reset();
-    encoder_fl.reset();
-    encoder_rr.reset();
-    encoder_rl.reset();
     Thread::wait(INTERVAL*1000);
   }
 }

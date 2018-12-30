@@ -39,7 +39,7 @@ void fwdis_callback(const fwdis_msgs::FourWheelDriveIndependentSteering& msg)
 
 ros::Subscriber<std_msgs::Empty> reset_sub("/mbed/reset", reset_callback);
 ros::Subscriber<std_msgs::Empty> start_sub("/mbed/start", start_callback);
-ros::Subscriber<fwdis_msgs::FourWheelDriveIndependentSteering> fwdis_sub("/fwdis", fwdis_callback);
+ros::Subscriber<fwdis_msgs::FourWheelDriveIndependentSteering> fwdis_sub("/fwdis/velocity", fwdis_callback);
 
 void work(void const *args)
 {

@@ -44,7 +44,7 @@ private:
   static const int ID_F = 128;
   static const int ID_R = 129;
   static const int BAUDRATE = 9600;
-  constexpr static const double INTERVAL = 0.002;// [s]
+  constexpr static const double INTERVAL = 0.010;// [s]
   constexpr static const double GEAR_RATIO = 23.1;// 21*1.1
   static const int ENCODER_PULSE = 500;
   constexpr static const double VOLTAGE = 24;// [V]
