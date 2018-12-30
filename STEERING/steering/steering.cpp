@@ -9,11 +9,18 @@ Steering::Steering(void)
   encoder_rl.initialize();
   encoder_rr.initialize();
   for(int i=0;i<4;i++){
+    target_s.push_back(0);
+    if(i==0){
+      target_s[i] = M_PI/4.0;
+    }
     target_w.push_back(0);
+    current_s.push_back(0);
     current_w.push_back(0);
     pulse.push_back(0);
     offsets.push_back(0);
     angles.push_back(0);
+    sum_pulses.push_back(0);
+    negative_flag.push_back(0);
   }
   Potentiometer _pm_fr(PM_FR);
   Potentiometer _pm_fl(PM_FL);
@@ -24,7 +31,7 @@ Steering::Steering(void)
   potentiometers.push_back(_pm_rr);
   potentiometers.push_back(_pm_rl);
   for(int i=0;i<4;i++){
-    angles[i] = get_angle(i);
+    //angles[i] = get_angle(i);
   }
   PID _pid_fr;
   PID _pid_fl;
@@ -35,24 +42,20 @@ Steering::Steering(void)
   pid.push_back(_pid_rr);
   pid.push_back(_pid_rl);
   for(int i=0;i<4;i++){
-    pid[i].set_gain(1, 0, 0);
+    pid[i].set_gain(300.0, 500.0, 0);
     pid[i].set_dt(INTERVAL);
-    pid[i].set_input_limit(-MAX_W, MAX_W);
-    pid[i].set_output_limit(-MAX_W, MAX_W);
-    pid[i].set_integral_max(0.5);
+    pid[i].set_input_limit(-MAX_ANGLE, MAX_ANGLE);
+    pid[i].set_output_limit(-MAX_W / 2.0, MAX_W / 2.0);// for debug
+    pid[i].set_integral_max(0.01);
+    pid[i].set_set_point(target_s[i]);
   }
 }
 
 void Steering::test(void)
 {
-  /*
-  st_f.SetSpeedMotorA((int)(target_w[0] / MAX_W * 127));
-  st_f.SetSpeedMotorB((int)(target_w[1] / MAX_W * 127));
-  st_r.SetSpeedMotorA((int)(target_w[2] / MAX_W * 127));
-  st_r.SetSpeedMotorB((int)(target_w[3] / MAX_W * 127));
-  */
   for(int i=0;i<4;i++){
-    set_speed(i, omega_to_command(target_w[i]));
+    //set_speed(i, omega_to_command(target_w[i]));
+    //set_speed(i, omega_to_command(20));
   }
 }
 
@@ -74,28 +77,54 @@ void Steering::thread_starter(void const *p)
 void Steering::thread_worker()
 {
   while(1){
-    test();
-    pulse[0] = encoder_fr.get_pulse();
-    pulse[1] = -encoder_fl.get_pulse();
-    pulse[2] = -encoder_rr.get_pulse();
-    pulse[3] = -encoder_rl.get_pulse();
-    for(int i=0;i<4;i++){
-      angles[i] += 2.0 * M_PI * (pulse[i] / ENCODER_PULSE4 * GEAR_RATIO);
-    }
+    //test();
+    pulse[0] = -encoder_fr.get_pulse();
+    pulse[1] = encoder_fl.get_pulse();
+    pulse[2] = encoder_rr.get_pulse();
+    pulse[3] = encoder_rl.get_pulse();
     encoder_fr.reset();
     encoder_fl.reset();
     encoder_rr.reset();
     encoder_rl.reset();
+    for(int i=0;i<4;i++){
+      current_w[i] = 2.0 * M_PI * (double)pulse[i] / ENCODER_PULSE4 / INTERVAL;// motor omega
+      angles[i] += current_w[i] / GEAR_RATIO * INTERVAL;// steering theta
+      double output = pid[i].calculate(angles[i]);
+      if(angles[i] < -MAX_ANGLE * 0.8 || angles[i] > MAX_ANGLE * 0.8){
+        output= 0 ;
+      }
+      set_speed(i, omega_to_command(output));
+
+      //sum_pulses[i] = angles[i] * 1000;
+      //sum_pulses[i] = omega_to_command(target_w[i]) * 1000;
+      //sum_pulses[i] = output * 1000;
+      //sum_pulses[i] = target_s[i] * 1000;
+      sum_pulses[i] = (target_s[i] - angles[i]) * 1000;
+    }
+
     Thread::wait(INTERVAL*1000);
   }
 }
 
-void Steering::set_angular_velocity(double w_fr, double w_fl, double w_rr, double w_rl)
+void Steering::set_steering_angle(double s_fr, double s_fl, double s_rr, double s_rl)
 {
-  target_w[0] = w_fr * GEAR_RATIO;
-  target_w[1] = w_fl * GEAR_RATIO;
-  target_w[2] = w_rr * GEAR_RATIO;
-  target_w[3] = w_rl * GEAR_RATIO;
+  target_s[0] = s_fr;
+  target_s[1] = s_fl;
+  target_s[2] = s_rr;
+  target_s[3] = s_rl;
+  for(int i=0;i<4;i++){
+    pid[i].set_set_point(target_s[i]);
+    if(target_s[i] < 0){
+      negative_flag[i] = true;
+    }else{
+      negative_flag[i] = false;
+    }
+  }
+  //for debug
+  target_w[0] = s_fr;
+  target_w[1] = s_fl;
+  target_w[2] = s_rr;
+  target_w[3] = s_rl;
 }
 
 // for debug
@@ -103,7 +132,7 @@ std::string Steering::get_pulses(void)
 {
   std::string str = "";
   for(int i=0;i<pulse.size();i++){
-    str += std::to_string(pulse[i]) + ", ";
+    str += std::to_string(sum_pulses[i]) + ", ";
   }
   return str;
 }
