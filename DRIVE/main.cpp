@@ -62,7 +62,7 @@ int main()
   while(1){
     nh.spinOnce();
 
-    Thread::wait(1000);
+    Thread::wait(100);
   }
   //return 0;
 }
