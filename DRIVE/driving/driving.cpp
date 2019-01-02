@@ -14,6 +14,7 @@ Driving::Driving(void)
     pulse.push_back(0);
     sum_pulses.push_back(0);
     negative_flag.push_back(false);
+    outputs.push_back(0);
   }
   PID _pid_fr;
   PID _pid_fl;
@@ -24,10 +25,10 @@ Driving::Driving(void)
   pid.push_back(_pid_rr);
   pid.push_back(_pid_rl);
   for(int i=0;i<4;i++){
-    pid[i].set_gain(0.040, 0.0, -0.00001);
+    pid[i].set_gain(0.1, 0.0, 0.0);
     pid[i].set_dt(INTERVAL);
-    pid[i].set_input_limit(0, MAX_W);
-    pid[i].set_output_limit(0, VOLTAGE);
+    pid[i].set_input_limit(-MAX_W, MAX_W);
+    pid[i].set_output_limit(-VOLTAGE, VOLTAGE);
     pid[i].set_integral_max(0.01);
     pid[i].set_set_point(0);
   }
@@ -77,18 +78,14 @@ void Driving::thread_worker()
     encoder_rl.reset();
     for(int i=0;i<4;i++){
       current_w[i] = 2.0 * M_PI * (double)pulse[i] / ENCODER_PULSE4 / INTERVAL;// motor omega
-      if(negative_flag[i]){
-        current_w[i] = -current_w[i];
+      outputs[i] += pid[i].calculate(current_w[i]);
+      if(outputs[i] < -VOLTAGE){
+        outputs[i] = -VOLTAGE;
+      }else if(outputs[i] > VOLTAGE){
+        outputs[i] = VOLTAGE;
       }
-      double output = pid[i].calculate(current_w[i]);
-      if(negative_flag[i]){
-        output = -output;
-      }
-      if(negative_flag[i]){
-        set_speed(i, omega_to_command(-target_w[i]));
-      }else{
-        set_speed(i, omega_to_command(target_w[i]));
-      }
+      set_speed(i, voltage_to_command(outputs[i]));
+
       //set_speed(i, voltage_to_command(output));
       //set_speed(i, omega_to_command(231));
       //sum_pulses[i] += pulse[i];

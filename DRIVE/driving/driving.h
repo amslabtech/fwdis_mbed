@@ -37,6 +37,7 @@ private:
   std::vector<PID> pid;// fr, fl, rr, rl
   std::vector<int> sum_pulses;
   std::vector<bool> negative_flag;//fr, fl, rr, rl
+  std::vector<double> outputs;//fr, fl, rr, rl
 
   const int ENCODER_PULSE4;
 
