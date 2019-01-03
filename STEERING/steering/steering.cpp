@@ -10,9 +10,6 @@ Steering::Steering(void)
   encoder_rr.initialize();
   for(int i=0;i<4;i++){
     target_s.push_back(0);
-    if(i==0){
-      target_s[i] = M_PI/4.0;
-    }
     target_w.push_back(0);
     current_s.push_back(0);
     current_w.push_back(0);
@@ -95,12 +92,16 @@ void Steering::thread_worker()
       }
       set_speed(i, omega_to_command(output));
 
-      //sum_pulses[i] = angles[i] * 1000;
+      sum_pulses[i] = angles[i] * 1000;
       //sum_pulses[i] = omega_to_command(target_w[i]) * 1000;
       //sum_pulses[i] = output * 1000;
       //sum_pulses[i] = target_s[i] * 1000;
-      sum_pulses[i] = (target_s[i] - angles[i]) * 1000;
+      //sum_pulses[i] = (target_s[i] - angles[i]) * 1000;
     }
+    fwdis_steer.front_right_steering_angle = angles[0];
+    fwdis_steer.front_left_steering_angle = angles[1];
+    fwdis_steer.rear_right_steering_angle = angles[2];
+    fwdis_steer.rear_left_steering_angle = angles[3];
 
     Thread::wait(INTERVAL*1000);
   }
@@ -169,4 +170,9 @@ void Steering::set_speed(int id, int speed)
       st_r.SetSpeedMotorB(speed);
       break;
   }
+}
+
+void Steering::get_odom_data(fwdis_msgs::FourWheelDriveIndependentSteering& data)
+{
+  data = fwdis_steer;
 }

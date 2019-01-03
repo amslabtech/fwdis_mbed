@@ -16,6 +16,9 @@ ros::NodeHandle nh;
 std_msgs::String mbed_log;
 ros::Publisher mbed_log_pub("/mbed/log", &mbed_log);
 
+fwdis_msgs::FourWheelDriveIndependentSteering fwdis_drive;
+ros::Publisher fwdis_drive_pub("/odom/drive", &fwdis_drive);
+
 fwdis_msgs::FourWheelDriveIndependentSteering fwdis;
 
 void reset_callback(const std_msgs::Empty& msg)
@@ -48,16 +51,27 @@ void work(void const *args)
   }
 }
 
+void odom(void const *args)
+{
+  while(true){
+    driver.get_odom_data(fwdis_drive);
+    fwdis_drive_pub.publish(&fwdis_drive);
+    Thread::wait(10);
+  }
+}
+
 int main()
 {
   nh.getHardware()->setBaud(115200);
   nh.initNode();
   nh.advertise(mbed_log_pub);
+  nh.advertise(fwdis_drive_pub);
   nh.subscribe(start_sub);
   nh.subscribe(reset_sub);
   nh.subscribe(fwdis_sub);
 
   Thread thread(work);
+  Thread thread2(odom);
 
   while(1){
     nh.spinOnce();

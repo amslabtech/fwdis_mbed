@@ -9,6 +9,7 @@
 #include "stm32_rotary_encoder.h"
 #include "potentiometer.h"
 #include "pid.h"
+#include "fwdis_msgs/FourWheelDriveIndependentSteering.h"
 
 class Steering
 {
@@ -20,6 +21,7 @@ public:
   void set_steering_angle(double, double, double, double);
   std::string get_pulses(void);
   double get_angle(int);
+  void get_odom_data(fwdis_msgs::FourWheelDriveIndependentSteering&);
 
 private:
   int valtage_to_command(double);
@@ -44,6 +46,7 @@ private:
   std::vector<int> sum_pulses;// fr, fl, rr, rl
   std::vector<bool> negative_flag;// fr, fl, rr, rl
   Thread *_thread;
+  fwdis_msgs::FourWheelDriveIndependentSteering fwdis_steer;
 
   const int ENCODER_PULSE4;
 

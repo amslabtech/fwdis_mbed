@@ -8,6 +8,8 @@
 #include "Sabertooth.h"
 #include "stm32_rotary_encoder.h"
 #include "pid.h"
+#include <ros.h>
+#include "fwdis_msgs/FourWheelDriveIndependentSteering.h"
 
 class Driving
 {
@@ -18,6 +20,7 @@ public:
   void start_control(void);
   void set_angular_velocity(double, double, double, double);
   std::string get_pulses(void);
+  void get_odom_data(fwdis_msgs::FourWheelDriveIndependentSteering&);
 
 private:
   int voltage_to_command(double);
@@ -38,6 +41,7 @@ private:
   std::vector<int> sum_pulses;
   std::vector<bool> negative_flag;//fr, fl, rr, rl
   std::vector<double> outputs;//fr, fl, rr, rl
+  fwdis_msgs::FourWheelDriveIndependentSteering fwdis_drive;
 
   const int ENCODER_PULSE4;
 

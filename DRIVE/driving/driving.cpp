@@ -93,6 +93,10 @@ void Driving::thread_worker()
       sum_pulses[i] = current_w[i] / GEAR_RATIO * 1000.0;
       //sum_pulses[i] = (target_w[i] - current_w[i]) * 1000.0;
     }
+    fwdis_drive.front_right_wheel_velocity = current_w[0] / GEAR_RATIO;
+    fwdis_drive.front_left_wheel_velocity = current_w[1] / GEAR_RATIO;
+    fwdis_drive.rear_right_wheel_velocity = current_w[2] / GEAR_RATIO;
+    fwdis_drive.rear_left_wheel_velocity = current_w[3] / GEAR_RATIO;
     Thread::wait(INTERVAL*1000);
   }
 }
@@ -144,4 +148,9 @@ void Driving::set_speed(int id, int speed)
       st_r.SetSpeedMotorB(speed);
       break;
   }
+}
+
+void Driving::get_odom_data(fwdis_msgs::FourWheelDriveIndependentSteering& data)
+{
+  data = fwdis_drive;
 }
