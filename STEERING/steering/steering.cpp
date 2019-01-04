@@ -87,7 +87,7 @@ void Steering::thread_worker()
       current_w[i] = 2.0 * M_PI * (double)pulse[i] / ENCODER_PULSE4 / INTERVAL;// motor omega
       angles[i] += current_w[i] / GEAR_RATIO * INTERVAL;// steering theta
       double output = pid[i].calculate(angles[i]);
-      if(angles[i] < -MAX_ANGLE * 0.8 || angles[i] > MAX_ANGLE * 0.8){
+      if((angles[i] < -MAX_ANGLE && output < 0) || (angles[i] > MAX_ANGLE && output > 0)){
         output= 0 ;
       }
       set_speed(i, omega_to_command(output));

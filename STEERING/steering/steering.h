@@ -60,7 +60,7 @@ private:
   constexpr static const double VOLTAGE = 24;// [V]
   constexpr static const double RAD_P_V = 34.348;//[rad/s/V]
   constexpr static const double MAX_W = 733;// [rad/s]
-  constexpr static const double MAX_ANGLE = M_PI / 2.0;//M_PI * 2.0 / 3.0;// [rad/s]
+  constexpr static const double MAX_ANGLE = M_PI * 2.0 / 3.0;// [rad/s]
   static const PinName PM_FR = PC_0;
   static const PinName PM_FL = PC_1;
   static const PinName PM_RR = PC_4;
