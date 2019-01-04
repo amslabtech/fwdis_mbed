@@ -85,12 +85,13 @@ void Driving::thread_worker()
         outputs[i] = VOLTAGE;
       }
       set_speed(i, voltage_to_command(outputs[i]));
+      //set_speed(2, voltage_to_command(6));
+      //set_speed(3, voltage_to_command(12));
 
-      //set_speed(i, omega_to_command(231));
       //sum_pulses[i] += pulse[i];
       //sum_pulses[i] = outputs[i] * 1000.0;
       //sum_pulses[i] = target_w[i] * 1000.0;
-      sum_pulses[i] = current_w[i] / GEAR_RATIO * 1000.0;
+      //sum_pulses[i] = current_w[i] / GEAR_RATIO * 1000.0;
       //sum_pulses[i] = (target_w[i] - current_w[i]) * 1000.0;
     }
     fwdis_drive.front_right_wheel_velocity = current_w[0] / GEAR_RATIO;
