@@ -19,6 +19,12 @@ ros::Publisher mbed_log_pub("/mbed/log", &mbed_log);
 fwdis_msgs::FourWheelDriveIndependentSteering fwdis_drive;
 ros::Publisher fwdis_drive_pub("/odom/drive", &fwdis_drive);
 
+std_msgs::Float32 duty_rr;
+ros::Publisher duty_rr_pub("/tinypower/duty0", &duty_rr);
+
+std_msgs::Float32 duty_rl;
+ros::Publisher duty_rl_pub("/tinypower/duty1", &duty_rl);
+
 fwdis_msgs::FourWheelDriveIndependentSteering fwdis;
 
 void reset_callback(const std_msgs::Empty& msg)
@@ -56,7 +62,13 @@ void odom(void const *args)
   while(true){
     driver.get_odom_data(fwdis_drive);
     fwdis_drive_pub.publish(&fwdis_drive);
-    Thread::wait(10);
+    // for tiny
+    duty_rr.data = driver.get_voltage_rr() / 24.0 * 100;
+    duty_rr_pub.publish(&duty_rr);
+    duty_rl.data = driver.get_voltage_rl() / 24.0 * 100;
+    duty_rl_pub.publish(&duty_rl);
+
+    Thread::wait(20);
   }
 }
 
@@ -66,6 +78,8 @@ int main()
   nh.initNode();
   nh.advertise(mbed_log_pub);
   nh.advertise(fwdis_drive_pub);
+  nh.advertise(duty_rr_pub);
+  nh.advertise(duty_rl_pub);
   nh.subscribe(start_sub);
   nh.subscribe(reset_sub);
   nh.subscribe(fwdis_sub);

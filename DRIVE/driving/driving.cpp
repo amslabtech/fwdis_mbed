@@ -32,6 +32,8 @@ Driving::Driving(void)
     pid[i].set_integral_max(0.01);
     pid[i].set_set_point(0);
   }
+  pid[2].set_gain(0.001, 0, 0);
+  pid[3].set_gain(0.001, 0, 0);
 }
 
 void Driving::test(void)
@@ -85,8 +87,6 @@ void Driving::thread_worker()
         outputs[i] = VOLTAGE;
       }
       set_speed(i, voltage_to_command(outputs[i]));
-      //set_speed(2, voltage_to_command(6));
-      //set_speed(3, voltage_to_command(12));
 
       //sum_pulses[i] += pulse[i];
       //sum_pulses[i] = outputs[i] * 1000.0;
@@ -155,3 +155,25 @@ void Driving::get_odom_data(fwdis_msgs::FourWheelDriveIndependentSteering& data)
 {
   data = fwdis_drive;
 }
+
+// for tiny
+double Driving::get_voltage_fr(void)
+{
+  return outputs[0];
+}
+
+double Driving::get_voltage_fl(void)
+{
+  return outputs[1];
+}
+
+double Driving::get_voltage_rr(void)
+{
+  return outputs[2];
+}
+
+double Driving::get_voltage_rl(void)
+{
+  return outputs[3];
+}
+

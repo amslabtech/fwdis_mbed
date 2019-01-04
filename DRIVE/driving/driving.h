@@ -21,6 +21,10 @@ public:
   void set_angular_velocity(double, double, double, double);
   std::string get_pulses(void);
   void get_odom_data(fwdis_msgs::FourWheelDriveIndependentSteering&);
+  double get_voltage_fr(void);
+  double get_voltage_fl(void);
+  double get_voltage_rr(void);
+  double get_voltage_rl(void);
 
 private:
   int voltage_to_command(double);
