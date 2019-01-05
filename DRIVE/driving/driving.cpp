@@ -32,8 +32,6 @@ Driving::Driving(void)
     pid[i].set_integral_max(0.01);
     pid[i].set_set_point(0);
   }
-  pid[2].set_gain(0.001, 0, 0);
-  pid[3].set_gain(0.001, 0, 0);
 }
 
 void Driving::test(void)
@@ -68,8 +66,13 @@ void Driving::thread_starter(void const *p)
 
 void Driving::thread_worker()
 {
+  Timer timer;
+  timer.start();
+  Thread::wait(INTERVAL*1000);
   while(1){
     //test();
+    double time = timer.read();
+    timer.reset();
     pulse[0] = encoder_fr.get_pulse();
     pulse[1] = encoder_fl.get_pulse();
     pulse[2] = -encoder_rr.get_pulse();
@@ -79,7 +82,7 @@ void Driving::thread_worker()
     encoder_rr.reset();
     encoder_rl.reset();
     for(int i=0;i<4;i++){
-      current_w[i] = 2.0 * M_PI * (double)pulse[i] / ENCODER_PULSE4 / INTERVAL;// motor omega
+      current_w[i] = 2.0 * M_PI * (double)pulse[i] / ENCODER_PULSE4 / time;// motor omega
       outputs[i] += pid[i].calculate(current_w[i]);
       if(outputs[i] < -VOLTAGE){
         outputs[i] = -VOLTAGE;
@@ -93,11 +96,13 @@ void Driving::thread_worker()
       //sum_pulses[i] = target_w[i] * 1000.0;
       //sum_pulses[i] = current_w[i] / GEAR_RATIO * 1000.0;
       //sum_pulses[i] = (target_w[i] - current_w[i]) * 1000.0;
+      sum_pulses[i] = time * 1000;
     }
     fwdis_drive.front_right_wheel_velocity = current_w[0] / GEAR_RATIO;
     fwdis_drive.front_left_wheel_velocity = current_w[1] / GEAR_RATIO;
     fwdis_drive.rear_right_wheel_velocity = current_w[2] / GEAR_RATIO;
     fwdis_drive.rear_left_wheel_velocity = current_w[3] / GEAR_RATIO;
+    timer.start();
     Thread::wait(INTERVAL*1000);
   }
 }
