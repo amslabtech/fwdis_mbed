@@ -19,11 +19,17 @@ ros::Publisher mbed_log_pub("/mbed/log", &mbed_log);
 fwdis_msgs::FourWheelDriveIndependentSteering fwdis_drive;
 ros::Publisher fwdis_drive_pub("/odom/drive", &fwdis_drive);
 
+std_msgs::Float32 duty_fr;
+ros::Publisher duty_fr_pub("/tinypower/duty0", &duty_fr);
+
+std_msgs::Float32 duty_fl;
+ros::Publisher duty_fl_pub("/tinypower/duty1", &duty_fl);
+
 std_msgs::Float32 duty_rr;
-ros::Publisher duty_rr_pub("/tinypower/duty0", &duty_rr);
+ros::Publisher duty_rr_pub("/tinypower/duty2", &duty_rr);
 
 std_msgs::Float32 duty_rl;
-ros::Publisher duty_rl_pub("/tinypower/duty1", &duty_rl);
+ros::Publisher duty_rl_pub("/tinypower/duty3", &duty_rl);
 
 fwdis_msgs::FourWheelDriveIndependentSteering fwdis;
 
@@ -63,6 +69,10 @@ void odom(void const *args)
     driver.get_odom_data(fwdis_drive);
     fwdis_drive_pub.publish(&fwdis_drive);
     // for tiny
+    duty_fr.data = driver.get_voltage_fr() / 24.0 * 100;
+    duty_fr_pub.publish(&duty_fr);
+    duty_fl.data = driver.get_voltage_fl() / 24.0 * 100;
+    duty_fl_pub.publish(&duty_fl);
     duty_rr.data = driver.get_voltage_rr() / 24.0 * 100;
     duty_rr_pub.publish(&duty_rr);
     duty_rl.data = driver.get_voltage_rl() / 24.0 * 100;
@@ -78,6 +88,8 @@ int main()
   nh.initNode();
   nh.advertise(mbed_log_pub);
   nh.advertise(fwdis_drive_pub);
+  nh.advertise(duty_fr_pub);
+  nh.advertise(duty_fl_pub);
   nh.advertise(duty_rr_pub);
   nh.advertise(duty_rl_pub);
   nh.subscribe(start_sub);
