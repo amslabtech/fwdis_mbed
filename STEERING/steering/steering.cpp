@@ -39,7 +39,7 @@ Steering::Steering(void)
   pid.push_back(_pid_rr);
   pid.push_back(_pid_rl);
   for(int i=0;i<4;i++){
-    pid[i].set_gain(300.0, 500.0, 0);
+    pid[i].set_gain(300.0, 1000.0, 0);
     pid[i].set_dt(INTERVAL);
     pid[i].set_input_limit(-MAX_ANGLE, MAX_ANGLE);
     pid[i].set_output_limit(-MAX_W / 2.0, MAX_W / 2.0);// for debug
@@ -73,6 +73,10 @@ void Steering::thread_starter(void const *p)
 
 void Steering::thread_worker()
 {
+  encoder_fr.reset();
+  encoder_fl.reset();
+  encoder_rr.reset();
+  encoder_rl.reset();
   while(1){
     //test();
     pulse[0] = -encoder_fr.get_pulse();

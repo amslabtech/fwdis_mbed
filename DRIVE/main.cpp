@@ -57,8 +57,10 @@ void work(void const *args)
 {
   mbed_log.data = "";
   while(true){
+    /*
     mbed_log.data = driver.get_pulses().c_str();
     mbed_log_pub.publish(&mbed_log);
+    */
     Thread::wait(500);
   }
 }

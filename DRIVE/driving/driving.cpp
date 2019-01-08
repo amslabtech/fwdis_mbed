@@ -69,6 +69,10 @@ void Driving::thread_worker()
   Timer timer;
   timer.start();
   Thread::wait(INTERVAL*1000);
+  encoder_fr.reset();
+  encoder_fl.reset();
+  encoder_rr.reset();
+  encoder_rl.reset();
   while(1){
     //test();
     double time = timer.read();
@@ -89,14 +93,20 @@ void Driving::thread_worker()
       }else if(outputs[i] > VOLTAGE){
         outputs[i] = VOLTAGE;
       }
+      if(outputs[i] > 0 && current_w[i] < 0){
+        outputs[i] = 0;
+      }else if(outputs[i] < 0 && current_w[i] > 0)
+      {
+        outputs[i] = 0;
+      }
       set_speed(i, voltage_to_command(outputs[i]));
 
       //sum_pulses[i] += pulse[i];
       //sum_pulses[i] = outputs[i] * 1000.0;
       //sum_pulses[i] = target_w[i] * 1000.0;
-      //sum_pulses[i] = current_w[i] / GEAR_RATIO * 1000.0;
+      sum_pulses[i] = current_w[i] / GEAR_RATIO * 1000.0;
       //sum_pulses[i] = (target_w[i] - current_w[i]) * 1000.0;
-      sum_pulses[i] = time * 1000;
+      //sum_pulses[i] = time * 1000;
     }
     fwdis_drive.front_right_wheel_velocity = current_w[0] / GEAR_RATIO;
     fwdis_drive.front_left_wheel_velocity = current_w[1] / GEAR_RATIO;

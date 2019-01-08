@@ -48,10 +48,12 @@ void work(void const *args)
 {
   mbed_log.data = "";
   while(true){
+    /*
     mbed_log.data = steering.get_pulses().c_str();
     mbed_log_pub.publish(&mbed_log);
     mbed_val.data = steering.get_angle(0);
     mbed_val_pub.publish(&mbed_val);
+    */
     Thread::wait(500);
   }
 }
@@ -61,7 +63,7 @@ void odom(void const *args)
   while(true){
     steering.get_odom_data(fwdis_steer);
     fwdis_steer_pub.publish(&fwdis_steer);
-    Thread::wait(10);
+    Thread::wait(50);
   }
 }
 
