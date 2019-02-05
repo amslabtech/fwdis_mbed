@@ -18,6 +18,7 @@ Steering::Steering(void)
     angles.push_back(0);
     sum_pulses.push_back(0);
     negative_flag.push_back(0);
+    outputs.push_back(0);
   }
   Potentiometer _pm_fr(PM_FR);
   Potentiometer _pm_fl(PM_FL);
@@ -93,6 +94,12 @@ void Steering::thread_worker()
       double output = pid[i].calculate(angles[i]);
       if((angles[i] < -MAX_ANGLE && output < 0) || (angles[i] > MAX_ANGLE && output > 0)){
         output= 0 ;
+      }
+      outputs[i] = output / RAD_P_V;
+      if(outputs[i] < -VOLTAGE){
+        outputs[i] = -VOLTAGE;
+      }else if(outputs[i] > VOLTAGE){
+        outputs[i] = VOLTAGE;
       }
       set_speed(i, omega_to_command(output));
 
@@ -180,3 +187,25 @@ void Steering::get_odom_data(fwdis_msgs::FourWheelDriveIndependentSteering& data
 {
   data = fwdis_steer;
 }
+
+// for tiny
+double Steering::get_voltage_fr(void)
+{
+  return outputs[0];
+}
+
+double Steering::get_voltage_fl(void)
+{
+  return outputs[1];
+}
+
+double Steering::get_voltage_rr(void)
+{
+  return outputs[2];
+}
+
+double Steering::get_voltage_rl(void)
+{
+  return outputs[3];
+}
+

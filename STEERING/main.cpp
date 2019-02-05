@@ -24,6 +24,18 @@ ros::Publisher fwdis_steer_pub("/odom/steer", &fwdis_steer);
 
 fwdis_msgs::FourWheelDriveIndependentSteering fwdis;
 
+std_msgs::Float32 duty_fr;
+ros::Publisher duty_fr_pub("/tinypower/steer/duty0", &duty_fr);
+
+std_msgs::Float32 duty_fl;
+ros::Publisher duty_fl_pub("/tinypower/steer/duty1", &duty_fl);
+
+std_msgs::Float32 duty_rr;
+ros::Publisher duty_rr_pub("/tinypower/steer/duty2", &duty_rr);
+
+std_msgs::Float32 duty_rl;
+ros::Publisher duty_rl_pub("/tinypower/steer/duty3", &duty_rl);
+
 void reset_callback(const std_msgs::Empty& msg)
 {
   NVIC_SystemReset();
@@ -63,6 +75,14 @@ void odom(void const *args)
   while(true){
     steering.get_odom_data(fwdis_steer);
     fwdis_steer_pub.publish(&fwdis_steer);
+    duty_fr.data = steering.get_voltage_fr() / 24.0 * 100;
+    duty_fr_pub.publish(&duty_fr);
+    duty_fl.data = steering.get_voltage_fl() / 24.0 * 100;
+    duty_fl_pub.publish(&duty_fl);
+    duty_rr.data = steering.get_voltage_rr() / 24.0 * 100;
+    duty_rr_pub.publish(&duty_rr);
+    duty_rl.data = steering.get_voltage_rl() / 24.0 * 100;
+    duty_rl_pub.publish(&duty_rl);
     Thread::wait(50);
   }
 }
@@ -77,6 +97,10 @@ int main()
   nh.subscribe(start_sub);
   nh.subscribe(reset_sub);
   nh.subscribe(fwdis_sub);
+  nh.advertise(duty_fr_pub);
+  nh.advertise(duty_fl_pub);
+  nh.advertise(duty_rr_pub);
+  nh.advertise(duty_rl_pub);
 
   Thread thread(work);
   Thread thread2(odom);

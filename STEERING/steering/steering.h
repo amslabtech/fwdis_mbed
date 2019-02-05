@@ -22,6 +22,10 @@ public:
   std::string get_pulses(void);
   double get_angle(int);
   void get_odom_data(fwdis_msgs::FourWheelDriveIndependentSteering&);
+  double get_voltage_fr(void);
+  double get_voltage_fl(void);
+  double get_voltage_rr(void);
+  double get_voltage_rl(void);
 
 private:
   int valtage_to_command(double);
@@ -47,6 +51,7 @@ private:
   std::vector<bool> negative_flag;// fr, fl, rr, rl
   Thread *_thread;
   fwdis_msgs::FourWheelDriveIndependentSteering fwdis_steer;
+  std::vector<double> outputs;//fr, fl, rr, rl
 
   const int ENCODER_PULSE4;
 
