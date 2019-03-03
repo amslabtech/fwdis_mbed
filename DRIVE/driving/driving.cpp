@@ -25,7 +25,7 @@ Driving::Driving(void)
   pid.push_back(_pid_rr);
   pid.push_back(_pid_rl);
   for(int i=0;i<4;i++){
-    pid[i].set_gain(0.01, 0.0, 0.0);
+    pid[i].set_gain(0.005, 0.0, 0.0);
     pid[i].set_dt(INTERVAL);
     pid[i].set_input_limit(-MAX_W, MAX_W);
     pid[i].set_output_limit(-VOLTAGE, VOLTAGE);

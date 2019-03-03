@@ -107,8 +107,7 @@ int main()
 
   while(1){
     nh.spinOnce();
-
-    Thread::wait(100);
+    Thread::wait(10);
   }
   //return 0;
 }
